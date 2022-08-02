@@ -1,0 +1,317 @@
+apigee_m10n.settings:
+  path: /admin/config/apigee-monetization
+  defaults:
+    _controller: \Drupal\system\Controller\SystemController::systemAdminMenuBlockPage
+    _title: Monetization
+  requirements:
+    _permission: administer apigee monetization
+  options:
+    # This enables monetization check for this route.
+    _apigee_monetization_route: TRUE
+
+# This route is required for field UI routes to be attached to.
+apigee_m10n.settings.rate_plan:
+  path: /admin/config/apigee-monetization/rate-plan
+  defaults:
+    _form: \Drupal\apigee_m10n\Form\RatePlanConfigForm
+    _title: Rate Plans
+  requirements:
+    _permission: administer apigee monetization
+  options:
+    _apigee_monetization_route: TRUE
+
+# This route is required for field UI routes to be attached to.
+apigee_m10n.settings.rate_plan_x:
+  path: /admin/config/apigee-monetization/rate-plan-x
+  defaults:
+    _form: \Drupal\apigee_m10n\Form\RatePlanXConfigForm
+    _title: Rate Plans X
+  requirements:
+    _permission: administer apigee monetization
+  options:
+    _apigee_monetization_route: TRUE
+
+apigee_m10n.settings.product_bundle:
+  path: /admin/config/apigee-monetization/product-bundle
+  defaults:
+    _controller: \Drupal\system\Controller\SystemController::systemAdminMenuBlockPage
+    _title: Product bundle settings
+  requirements:
+    _permission: administer apigee monetization
+  options:
+    _apigee_monetization_route: TRUE
+
+apigee_m10n.settings.xproduct:
+  path: /admin/config/apigee-monetization/xproduct
+  defaults:
+    _controller: \Drupal\system\Controller\SystemController::systemAdminMenuBlockPage
+    _title: Product X settings
+  requirements:
+    _permission: administer apigee monetization
+  options:
+    _apigee_monetization_route: TRUE
+
+apigee_m10n.settings.prepaid_balance:
+  path: /admin/config/apigee-monetization/prepaid-balance
+  defaults:
+    _form: \Drupal\apigee_m10n\Form\PrepaidBalanceConfigForm
+    _title: Prepaid balance
+  requirements:
+    _permission: administer apigee monetization
+  options:
+    _apigee_monetization_route: TRUE
+
+apigee_m10n.settings.purchased_plan:
+  path: /admin/config/apigee-monetization/purchased-plan-settings
+  defaults:
+    _controller: \Drupal\system\Controller\SystemController::systemAdminMenuBlockPage
+    _title: Rate plan purchase settings
+  requirements:
+    _permission: administer apigee monetization
+  options:
+    _apigee_monetization_route: TRUE
+
+entity.entity_view_display.purchased_plan.default:
+  path: admin/config/apigee-monetization/purchased-plan-settings/display
+  defaults:
+    _title: Rate plan purchases
+  requirements:
+    _permission: administer apigee monetization
+  options:
+    _apigee_monetization_route: TRUE
+
+apigee_m10n.settings.purchased_product:
+  path: /admin/config/apigee-monetization/purchased-product-settings
+  defaults:
+    _controller: \Drupal\system\Controller\SystemController::systemAdminMenuBlockPage
+    _title: ApigeeX product purchase settings
+  requirements:
+    _permission: administer apigee monetization
+  options:
+    _apigee_monetization_route: TRUE
+
+entity.product_bundle.collection:
+  path: /admin/config/apigee-monetization/product-bundle/list
+  defaults:
+    _entity_list: product_bundle
+    _title: Product bundles
+  requirements:
+    _permission: administer apigee monetization
+  options:
+    _apigee_monetization_route: TRUE
+
+entity.xproduct.collection:
+  path: /admin/config/apigee-monetization/xproduct/list
+  defaults:
+    _entity_list: xproduct
+    _title: Product X
+  requirements:
+    _permission: administer apigee monetization
+  options:
+    _apigee_monetization_route: TRUE
+
+apigee_monetization.my_billing:
+  path: /monetization/billing
+  defaults:
+    _controller: \Drupal\apigee_m10n\Controller\PrepaidBalanceController::myRedirect
+  requirements:
+    _permission: view own prepaid balance
+  options:
+    _apigee_monetization_route: TRUE
+
+apigee_monetization.billing:
+  path: /user/{user}/monetization/billing
+  defaults:
+    _controller: \Drupal\apigee_m10n\Controller\PrepaidBalanceController::prepaidBalancePage
+    _title: Prepaid balance
+  requirements:
+    user: '^[1-9]+[0-9]*$'
+    _custom_access: \Drupal\apigee_m10n\Controller\PrepaidBalanceController::access
+  options:
+    _apigee_monetization_route: TRUE
+
+apigee_monetization.xbilling:
+  path: /user/{user}/monetization/xbilling
+  defaults:
+    _controller: \Drupal\apigee_m10n\Controller\PrepaidBalanceXController::prepaidBalancePage
+    _title: Prepaid balance
+  requirements:
+    user: '^[1-9]+[0-9]*$'
+    _custom_access: \Drupal\apigee_m10n\Controller\PrepaidBalanceXController::access
+  options:
+    _apigee_monetization_route: TRUE
+
+apigee_monetization.my_plans:
+  path: /plans
+  defaults:
+    _controller: \Drupal\apigee_m10n\Controller\PricingAndPlansController::myPlans
+  requirements:
+    _permission: view rate_plan
+  options:
+    _apigee_monetization_route: TRUE
+
+apigee_monetization.plans:
+  path: /user/{user}/plans
+  defaults:
+    _controller: \Drupal\apigee_m10n\Controller\PricingAndPlansController::catalogPage
+    _title: "Pricing and Plans"
+  requirements:
+    _custom_access: \Drupal\apigee_m10n\Controller\PricingAndPlansController::access
+  options:
+    _apigee_monetization_route: TRUE
+
+apigee_monetization.xplans:
+  path: /user/{user}/xplans
+  defaults:
+    _controller: \Drupal\apigee_m10n\Controller\BuyApiController::xcatalogPage
+    _title: "Buy APIs"
+  requirements:
+    _custom_access: \Drupal\apigee_m10n\Controller\BuyApiController::access
+  options:
+    _apigee_monetization_route: TRUE
+
+apigee_monetization.profile:
+  path: /user/{user}/monetization/billing-details
+  defaults:
+    _form: \Drupal\apigee_m10n\Form\BillingDetailsForm
+    _title: Billing Details
+  requirements:
+    user: '^[1-9]+[0-9]*$'
+    _custom_access: \Drupal\apigee_m10n\Form\BillingDetailsForm::access
+  options:
+    _apigee_monetization_route: TRUE
+
+apigee_monetization.xprofile:
+  path: /user/{user}/monetization/xbilling-details
+  defaults:
+    _controller: \Drupal\apigee_m10n\Controller\BillingTypeController::myBillingType
+    _title: Billing Details
+  requirements:
+    user: '^[1-9]+[0-9]*$'
+    _custom_access: \Drupal\apigee_m10n\Controller\BillingTypeController::access
+  options:
+    _apigee_monetization_route: TRUE
+
+apigee_monetization.reports:
+  path: /user/{user}/monetization/reports
+  defaults:
+    _form: \Drupal\apigee_m10n\Form\ReportsDownloadForm
+    _title: Download Reports
+  requirements:
+    user: '^[1-9]+[0-9]*$'
+    _custom_access: \Drupal\apigee_m10n\Form\ReportsDownloadForm::access
+  options:
+    _apigee_monetization_route: TRUE
+
+entity.purchased_plan.developer_collection:
+  path: /user/{user}/monetization/purchased-plans
+  defaults:
+    _controller: \Drupal\apigee_m10n\Entity\ListBuilder\PurchasedPlanListBuilderForDeveloper::render
+    _title_callback: \Drupal\apigee_m10n\Entity\ListBuilder\PurchasedPlanListBuilderForDeveloper::getPageTitle
+  requirements:
+    user: '^[1-9]+[0-9]*$'
+    _custom_access: \Drupal\apigee_m10n\Entity\ListBuilder\PurchasedPlanListBuilderForDeveloper::access
+  options:
+    _apigee_monetization_route: TRUE
+
+entity.purchased_product.developer_product_collection:
+  path: /user/{user}/monetization/purchased-product
+  defaults:
+    _controller: \Drupal\apigee_m10n\Entity\ListBuilder\PurchasedProductListBuilderForDeveloper::render
+    _title_callback: \Drupal\apigee_m10n\Entity\ListBuilder\PurchasedProductListBuilderForDeveloper::getPageTitle
+  requirements:
+    user: '^[1-9]+[0-9]*$'
+    _custom_access: \Drupal\apigee_m10n\Entity\ListBuilder\PurchasedProductListBuilderForDeveloper::access
+  options:
+    _apigee_monetization_route: TRUE
+    no_cache: 'TRUE'
+
+entity.rate_plan.canonical:
+  path: /user/{user}/monetization/product-bundle/{product_bundle}/plan/{rate_plan}
+  defaults:
+    _entity_view: rate_plan.full
+    _title_callback: \Drupal\Core\Entity\Controller\EntityController::title
+  requirements:
+    user: '^[1-9]+[0-9]*$'
+    _entity_developer_access: rate_plan.view
+  options:
+    _apigee_monetization_route: TRUE
+    parameters:
+      user:
+        type: entity:user
+      rate_plan:
+        type: entity:rate_plan
+        converter: paramconverter.entity.rate_plan
+
+entity.xrate_plan.canonical:
+  path: /user/{user}/monetization/xproduct/{xproduct}/plan/{xrate_plan}
+  defaults:
+    _entity_view: xrate_plan.full
+    _title_callback: \Drupal\Core\Entity\Controller\EntityController::title
+  requirements:
+    user: '^[1-9]+[0-9]*$'
+    _entity_developer_access: xrate_plan.view
+  options:
+    _apigee_monetization_route: TRUE
+    parameters:
+      user:
+        type: entity:user
+      xrate_plan:
+        type: entity:xrate_plan
+        converter: paramconverter.entity.xrate_plan
+
+entity.rate_plan.purchase:
+  path: /user/{user}/monetization/product-bundle/{product_bundle}/plan/{rate_plan}/purchase
+  defaults:
+    _controller: \Drupal\apigee_m10n\Entity\Controller\PurchaseRatePlanController::purchaseForm
+    _title_callback: \Drupal\apigee_m10n\Entity\Controller\PurchaseRatePlanController::title
+  requirements:
+    user: '^[1-9]+[0-9]*$'
+    _entity_developer_access: rate_plan.purchase
+  options:
+    _apigee_monetization_route: TRUE
+
+entity.xrate_plan.purchase:
+  path: /user/{user}/monetization/xproduct/{xproduct}/plan/{xrate_plan}/purchase
+  defaults:
+    _controller: \Drupal\apigee_m10n\Entity\Controller\PurchaseRatePlanXController::purchaseForm
+    _title_callback: \Drupal\apigee_m10n\Entity\Controller\PurchaseRatePlanXController::title
+  requirements:
+    user: '^[1-9]+[0-9]*$'
+    _entity_developer_access: xrate_plan.purchase
+  options:
+    _apigee_monetization_route: TRUE
+
+entity.purchased_plan.developer_cancel_form:
+  path: /user/{user}/monetization/purchased-plan/{purchased_plan}/cancel
+  defaults:
+    _entity_form: purchased_plan.cancel
+    _title_callback: \Drupal\Core\Entity\Controller\EntityController::title
+  requirements:
+    user: '^[1-9]+[0-9]*$'
+    _entity_access: purchased_plan.update
+  options:
+    _apigee_monetization_route: TRUE
+    parameters:
+      user:
+        type: entity:user
+      purchased_plan:
+        type: entity:purchased_plan
+        converter: paramconverter.entity.purchased_plan
+
+entity.purchased_product.developer_cancel_form:
+  path: /user/{user}/monetization/purchased-product/{purchased_product}/cancel
+  defaults:
+    _entity_form: purchased_product.cancel
+    _title_callback: \Drupal\Core\Entity\Controller\EntityController::title
+  requirements:
+    user: '^[1-9]+[0-9]*$'
+    _entity_access: purchased_product.update
+  options:
+    _apigee_monetization_route: TRUE
+    parameters:
+      user:
+        type: entity:user
+      purchased_product:
+        type: entity:purchased_product
+        converter: paramconverter.entity.purchased_product

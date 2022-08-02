@@ -1,0 +1,173 @@
+<?php
+
+/**
+ * @file
+ * Copyright 2018 Google Inc.
+ *
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License version 2 as published by the
+ * Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc., 51
+ * Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+ */
+
+use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Extension\InfoParser;
+use Drupal\Core\Extension\InfoParserInterface;
+use Drupal\Core\Session\AccountInterface;
+use Drupal\apigee_m10n\Entity\RatePlanInterface;
+
+/**
+ * Implements hook_ENTITY_TYPE_access().
+ */
+function apigee_m10n_api_product_access(EntityInterface $entity, $operation, AccountInterface $account) {
+  // For the assignment operation a product must either be free or purchased.
+  if ($operation == 'assign') {
+    return \Drupal::service('apigee_m10n.monetization')
+      ->apiProductAssignmentAccess($entity, $account);
+  }
+
+  // No opinion on other operations.
+  return AccessResult::neutral();
+}
+
+/**
+ * Implements hook_theme().
+ */
+function apigee_m10n_theme($existing, $type, $theme, $path) {
+  return [
+    'apigee_entity__rate_plan' => [
+      'base hook' => 'apigee_entity',
+    ],
+    'apigee_entity__product_bundle' => [
+      'base hook' => 'apigee_entity',
+    ],
+    'apigee_entity__xrate_plan' => [
+      'base hook' => 'apigee_entity',
+    ],
+    'apigee_entity__xproduct' => [
+      'base hook' => 'apigee_entity',
+    ],
+    'api_product' => [
+      'variables' => ['api_product' => NULL],
+    ],
+    'rate_plan_detail' => [
+      'variables' => [
+        'detail' => NULL,
+        'ratecard_rates' => NULL,
+        'revshare_rates' => NULL,
+        'free_quantity' => NULL,
+        'entity' => NULL,
+        'apiproduct' => NULL,
+      ],
+      'template' => 'rate-plan-detail',
+    ],
+    'rate_plan_xfee' => [
+      'variables' => [
+        'detail' => NULL,
+        'entity' => NULL,
+      ],
+      'template' => 'rate-plan-xfee',
+    ],
+    'rate_plan_fixed_recurringfee' => [
+      'variables' => [
+        'detail' => NULL,
+        'entity' => NULL,
+      ],
+      'template' => 'rate-plan-fixed-recurringfee',
+    ],
+    'rate_plan_consumption_rates' => [
+      'variables' => [
+        'detail' => NULL,
+        'fee_currency_code' => NULL,
+        'fee_units' => NULL,
+        'fee_nanos' => NULL,
+        'multipleConsumptionText' => NULL,
+        'singleConsumptionText' => NULL,
+        'entity' => NULL,
+      ],
+      'template' => 'rate-plan-consumption-rates',
+    ],
+    'rate_plan_revenue_rates' => [
+      'variables' => [
+        'detail' => NULL,
+        'revenueSharePercentage' => NULL,
+        'singleShareText' => NULL,
+        'multipleShareText' => NULL,
+        'entity' => NULL,
+      ],
+      'template' => 'rate-plan-revenue-rates',
+    ],
+    'ratecard_rates' => [
+      'variables' => [
+        'rates' => NULL,
+      ],
+    ],
+    'revshare_rates' => [
+      'variables' => [
+        'rates' => NULL,
+      ],
+    ],
+    'conflicting_products' => [
+      'variables' => ['items' => NULL],
+      'template' => 'conflicting-products',
+    ],
+  ];
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function apigee_m10n_form_user_admin_permissions_alter(&$form, FormStateInterface $form_state, $form_id) {
+  \Drupal::service('apigee_m10n.monetization')->formUserAdminPermissionsAlter($form, $form_state, $form_id);
+}
+
+/**
+ * Implements hook_apigee_edge_user_agent_string_alter().
+ */
+function apigee_m10n_apigee_edge_user_agent_string_alter(&$user_agent_parts) {
+    $infoParser = new InfoParser();
+    $m10_module_info = $infoParser->parse(\Drupal::service('module_handler')->getModule('apigee_m10n')->getPathname());
+  
+    if (!isset($m10_module_info['version'])) {
+      $m10_module_info['version'] = '2.x-dev';
+    }
+
+    // m10 module info at beginning of the array.
+    array_unshift($user_agent_parts , $m10_module_info['name'] . '/' . $m10_module_info['version']);
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_presave().
+ */
+function apigee_m10n_user_role_presave(EntityInterface $entity) {
+  \Drupal::service('apigee_m10n.monetization')->userRolePresave($entity);
+}
+
+/**
+ * Implements hook_preprocess_field().
+ */
+function apigee_m10n_preprocess_field(&$variables) {
+  // Add a library to the rate plan `futurePlanLinks` field.
+  if ($variables['field_name'] === 'futurePlanLinks') {
+    $variables['#attached']['library'][] = 'apigee_m10n/rate_plan.future_links_field';
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_create_access().
+ */
+function apigee_m10n_purchased_plan_create_access(AccountInterface $account, array $context, $entity_bundle) {
+  // Make sure rate plan context exists.
+  $access = AccessResult::allowedIf(isset($context['rate_plan']) && $context['rate_plan'] instanceof RatePlanInterface);
+  return $access->andIf($context['rate_plan']->access('purchase', $account, TRUE));
+}

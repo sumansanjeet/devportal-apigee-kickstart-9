@@ -1,0 +1,31 @@
+adobe_launch.settings:
+  type: config_object
+  label: Settings
+  mapping:
+    adobe-launch-enable:
+      label: 'Enable Adobe Launch'
+      type: boolean
+    target-adobe-launch-environment:
+      label: 'Target adobe of launch environment'
+      type: string
+    adobe-launch-async:
+      label: 'Adobe launch async'
+      type: boolean
+    init-js-array:
+      label: 'Init js array'
+      type: boolean
+    adobe-launch-prod-url:
+      label: 'Adobe launch prod url'
+      type: string
+    adobe-launch-staging-url:
+      label: 'Adobe launch staging url'
+      type: string
+    adobe-launch-registrant:
+      label: 'Adobe launch registrant'
+      type: string
+    paths:
+      label: 'Paths'
+      type: string
+    paths_negate:
+      label: 'Add entity meta data to pages'
+      type: string

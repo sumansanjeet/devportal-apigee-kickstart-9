@@ -1,0 +1,18 @@
+api_response_check.admin_settings_form:  
+  path: '/admin/config/api-response-check/adminsettings'  
+  defaults:  
+    _form: '\Drupal\api_response_check\Form\ApiInputForm'  
+    _title: 'API Input form'  
+  requirements:  
+    _permission: 'administer site configuration'
+  options:  
+    _admin_route: TRUE
+api_response_check.view_results:
+  path: '/admin/config/api-response-check/view-results'
+  defaults:
+    _controller: '\Drupal\api_response_check\Controller\ApiResponseController::results'
+    _title: 'API Response Results'
+  requirements:
+    _permission: 'administer site configuration'
+  options:  
+    _admin_route: TRUE

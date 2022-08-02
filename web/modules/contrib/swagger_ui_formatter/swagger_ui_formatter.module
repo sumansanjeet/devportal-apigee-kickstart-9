@@ -1,0 +1,122 @@
+<?php
+
+/**
+ * @file
+ * Main module file for Swagger UI Field Formatter.
+ */
+
+declare(strict_types = 1);
+
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\swagger_ui_formatter\Exception\SwaggerUiLibraryDiscoveryExceptionInterface;
+
+/**
+ * Implements hook_theme().
+ */
+function swagger_ui_formatter_theme(): array {
+  return [
+    'swagger_ui_field_item' => [
+      'variables' => [
+        'field_name' => NULL,
+        'delta' => NULL,
+      ],
+    ],
+  ];
+}
+
+/**
+ * Implements hook_library_info_build().
+ */
+function swagger_ui_formatter_library_info_build(): array {
+  $libraries = [];
+  /** @var \Drupal\swagger_ui_formatter\Service\SwaggerUiLibraryDiscoveryInterface $swagger_ui_library_discovery */
+  $swagger_ui_library_discovery = \Drupal::service('swagger_ui_formatter.swagger_ui_library_discovery');
+
+  try {
+    $library_dir = $swagger_ui_library_discovery->libraryDirectory();
+    $library_version = $swagger_ui_library_discovery->libraryVersion();
+  }
+  catch (SwaggerUiLibraryDiscoveryExceptionInterface $exception) {
+    \Drupal::logger('swagger_ui_formatter')->error('Unable to register Swagger UI library: ' . $exception->getMessage());
+    return $libraries;
+  }
+
+  // Add a leading slash to the library directory path to indicate in
+  // $libraries[] that it's relative to DRUPAL_ROOT. Otherwise, it's considered
+  // as a relative path from the current module.
+  $library_dir = '/' . $library_dir;
+
+  // Library definition for the required Swagger UI files.
+  $libraries['swagger_ui_formatter.swagger_ui'] = [
+    'version' => $library_version,
+    'css' => [
+      'theme' => [
+        $library_dir . '/dist/swagger-ui.css' => ['minified' => TRUE],
+      ],
+    ],
+    'js' => [
+      $library_dir . '/dist/swagger-ui-bundle.js' => ['minified' => TRUE],
+      $library_dir . '/dist/swagger-ui-standalone-preset.js' => ['minified' => TRUE],
+    ],
+  ];
+  // Library definition for the Swagger UI integration files.
+  $libraries['swagger_ui_formatter.swagger_ui_integration'] = [
+    'version' => '1.0',
+    'js' => [
+      'js/swagger-ui-formatter.js' => [],
+    ],
+    'dependencies' => [
+      'core/drupal',
+      'core/jquery',
+      'core/drupalSettings',
+      'swagger_ui_formatter/swagger_ui_formatter.swagger_ui',
+    ],
+  ];
+  return $libraries;
+}
+
+/**
+ * Implements hook_help().
+ */
+function swagger_ui_formatter_help(string $route_name, RouteMatchInterface $route_match): string {
+  $output = '';
+  switch ($route_name) {
+    case 'help.page.swagger_ui_formatter':
+      $readme = file_get_contents(__DIR__ . '/README.md');
+      // If the Markdown module is installed, use it to render the README.
+      if ($readme && (\Drupal::moduleHandler()->moduleExists('markdown') === TRUE)) {
+        $filter_manager = \Drupal::service('plugin.manager.filter');
+        $settings = \Drupal::configFactory()->get('markdown.settings')->getRawData();
+        $filter = $filter_manager->createInstance('markdown', ['settings' => $settings]);
+        $output = $filter->process($readme, 'en');
+      }
+      // Else the Markdown module is not installed output the README as text.
+      elseif ($readme) {
+        $output = '<pre>' . $readme . '</pre>';
+      }
+      // Add a link to the Drupal.org project.
+      $output .= '<p>';
+      $output .= t('Visit the <a href=":project_link">project page</a> on Drupal.org for more information.', [
+        ':project_link' => 'https://www.drupal.org/project/swagger_ui_formatter',
+      ]);
+      $output .= '</p>';
+  }
+  return $output;
+}
+
+/**
+ * Implements hook_cache_flush().
+ */
+function swagger_ui_formatter_cache_flush(): void {
+  // The library discovery service might not exist in certain situations (like
+  // when someone upgrades the module from 8.x-2.x) so we check its existence.
+  // @todo The condition can be removed in 4.x.
+  $service_name = 'swagger_ui_formatter.swagger_ui_library_discovery';
+  if (\Drupal::hasService($service_name)) {
+    /** @var \Drupal\swagger_ui_formatter\Service\SwaggerUiLibraryDiscoveryInterface $swagger_ui_library_discovery */
+    $swagger_ui_library_discovery = \Drupal::service($service_name);
+    if (method_exists($swagger_ui_library_discovery, 'reset')) {
+      $swagger_ui_library_discovery->reset();
+    }
+  }
+}

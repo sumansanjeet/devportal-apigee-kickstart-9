@@ -1,0 +1,11 @@
+api_response_check.admin_settings_form:
+  route_name: api_response_check.admin_settings_form
+  title: API Input Configuration Form
+  base_route: api_response_check.admin_settings_form
+  weight: 1
+
+api_response_check.view_results:
+  route_name: api_response_check.view_results
+  title: View Results
+  base_route: api_response_check.admin_settings_form
+  weight: 2

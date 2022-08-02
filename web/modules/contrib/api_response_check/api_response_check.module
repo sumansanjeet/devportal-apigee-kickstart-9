@@ -1,0 +1,66 @@
+<?php
+
+/**
+ * @file
+ * Custom Module to check api response status.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Component\Utility\Html;
+
+/**
+ * Implements hook_cron().
+ */
+function api_response_check_cron() {
+  // Get API URLs from the configuration.
+  if ($config_data = \Drupal::config('api_response_check.settings')->get('api_inputs')) {
+    $urls = explode(PHP_EOL, $config_data);
+    // Log the information into Database.
+    foreach ($urls as $uri) {
+      $api_url = trim($uri);
+      $response = \Drupal::httpClient()->get($api_url, ['http_errors' => FALSE, 'headers' => ['Accept' => 'text/plain']]);
+      if ($response->getStatusCode() == 200) {
+        \Drupal::database()->insert('api_response_check')
+          ->fields([
+            'status' => 'Success',
+            'api_url' => $api_url,
+            'timestamp' => time(),
+            'severity' => 1,
+          ])
+          ->execute();
+      }
+      else {
+        \Drupal::database()->insert('api_response_check')
+          ->fields([
+            'status' => 'Failure',
+            'api_url' => $api_url,
+            'timestamp' => time(),
+            'severity' => 0,
+          ])
+          ->execute();
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_help().
+ */
+function api_response_check_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    case 'help.page.api_response_check':
+      $text = file_get_contents(__DIR__ . '/README.md');
+      if (!\Drupal::moduleHandler()->moduleExists('markdown')) {
+        return '<pre>' . Html::escape($text) . '</pre>';
+      }
+      else {
+        // Use the Markdown filter to render the README.
+        $filter_manager = \Drupal::service('plugin.manager.filter');
+        $settings = \Drupal::configFactory()->get('markdown.settings')->getRawData();
+        $config = ['settings' => $settings];
+        $filter = $filter_manager->createInstance('markdown', $config);
+        return $filter->process($text, 'en');
+      }
+  }
+  return NULL;
+}

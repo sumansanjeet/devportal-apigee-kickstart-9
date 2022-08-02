@@ -1,0 +1,107 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for Swagger UI Field Formatter.
+ */
+
+declare(strict_types = 1);
+
+use Drupal\Core\Cache\CacheableDependencyInterface;
+use Drupal\Core\Cache\CacheableMetadata;
+use Drupal\swagger_ui_formatter\Exception\SwaggerUiLibraryDiscoveryExceptionInterface;
+use Drupal\swagger_ui_formatter\Service\SwaggerUiLibraryDiscovery;
+
+/**
+ * Implements hook_requirements().
+ *
+ * Drush and Config Installer does not perform requirements check before
+ * enables a module.
+ *
+ * @see https://www.drupal.org/project/config_installer/issues/3061127
+ * @see https://github.com/drush-ops/drush/issues/3669
+ */
+function swagger_ui_formatter_requirements(string $phase): array {
+  $requirements = [];
+
+  // Make sure that the Swagger UI library discovery service is available.
+  if ($phase === 'install') {
+    /** @var \Drupal\Core\DependencyInjection\ClassResolverInterface $class_resolver */
+    $class_resolver = \Drupal::service('class_resolver');
+    $swagger_ui_library_discovery = $class_resolver->getInstanceFromDefinition(SwaggerUiLibraryDiscovery::class);
+  }
+  else {
+    /** @var \Drupal\swagger_ui_formatter\Service\SwaggerUiLibraryDiscoveryInterface $swagger_ui_library_discovery */
+    $swagger_ui_library_discovery = \Drupal::service('swagger_ui_formatter.swagger_ui_library_discovery');
+  }
+
+  if (in_array($phase, ['runtime', 'install'])) {
+    try {
+      $library_dir = $swagger_ui_library_discovery->libraryDirectory();
+      $library_version = $swagger_ui_library_discovery->libraryVersion();
+      $requirements['swagger_ui_formatter'] = [
+        'title' => t('Swagger UI library'),
+        'severity' => REQUIREMENT_OK,
+        'value' => $library_version,
+        'description' => [
+          '#markup' => t('Swagger UI library installed at %path.', [
+            '%path' => $library_dir,
+          ]),
+        ],
+      ];
+    }
+    catch (SwaggerUiLibraryDiscoveryExceptionInterface $exception) {
+      $requirements['swagger_ui_formatter'] = [
+        'title' => t('Swagger UI library'),
+        'severity' => REQUIREMENT_ERROR,
+        'description' => [
+          // @todo Make this translatable.
+          '#markup' => $exception->getMessage(),
+        ],
+      ];
+    }
+    // Make sure that the status info is being refreshed if the theme changes.
+    if ($swagger_ui_library_discovery instanceof CacheableDependencyInterface) {
+      $requirement_description = &$requirements['swagger_ui_formatter']['description'];
+      $cacheable_metadata = CacheableMetadata::createFromRenderArray($requirement_description)->merge(CacheableMetadata::createFromObject($swagger_ui_library_discovery));
+      $cacheable_metadata->applyTo($requirement_description);
+    }
+  }
+
+  return $requirements;
+}
+
+/**
+ * Clear cache due to updated library definitions.
+ */
+function swagger_ui_formatter_update_8001(): void {
+  // An empty update forces a call to drupal_flush_all_caches().
+}
+
+/**
+ * Update old field formatter IDs.
+ */
+function swagger_ui_formatter_update_8002(): void {
+  // Rebuild cache first due to updated library and class definitions and to
+  // avoid undefined/invalid plugin ID errors.
+  drupal_flush_all_caches();
+  /** @var \Drupal\Core\Config\Entity\ConfigEntityStorage $storage */
+  $storage = \Drupal::entityTypeManager()->getStorage('entity_view_display');
+  /** @var \Drupal\Core\Entity\Entity\EntityViewDisplay $display */
+  foreach ($storage->loadMultiple() as $display) {
+    $display_needs_update = FALSE;
+    // Loop through components (enabled "non-hidden" fields and properties) and
+    // search for the old "swagger_ui" field formatter ID. Once one is found
+    // change it to the new ID and mark the display for update.
+    foreach ($display->getComponents() as $name => $component) {
+      if (isset($component['type']) && $component['type'] === 'swagger_ui') {
+        $component['type'] = 'swagger_ui_file';
+        $display->setComponent($name, $component);
+        $display_needs_update = TRUE;
+      }
+    }
+    if ($display_needs_update) {
+      $display->save();
+    }
+  }
+}

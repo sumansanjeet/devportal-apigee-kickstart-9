@@ -1,0 +1,57 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the api_response_check module.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function api_response_check_schema() {
+  $schema['api_response_check'] = [
+    'description' => 'Table that contains logs of all API responses.',
+    'fields' => [
+      'wid' => [
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => 'Primary Key: Unique API response event ID.',
+      ],
+      'status' => [
+        'type' => 'varchar_ascii',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Status of the API URL, for example "Success" or "Failure."',
+      ],
+      'api_url' => [
+        'type' => 'text',
+        'not null' => TRUE,
+        'size' => 'big',
+        'description' => 'API URL link',
+      ],
+      'timestamp' => [
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'description' => 'Unix timestamp of when event occurred.',
+      ],
+      'severity' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+        'size' => 'tiny',
+        'description' => 'The severity level of the event; ranges from 0 (Emergency) to 7 (Debug)',
+      ],
+    ],
+    'primary key' => ['wid'],
+    'indexes' => [
+      'status' => ['status'],
+      'api_url' => ['api_url'],
+      'severity' => ['severity'],
+    ],
+  ];
+
+  return $schema;
+}

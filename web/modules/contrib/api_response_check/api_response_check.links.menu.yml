@@ -1,0 +1,6 @@
+api_response_check.admin_settings_form:  
+  title: 'API Response check configuration'  
+  route_name: api_response_check.admin_settings_form  
+  description: 'API Response check configuration settings form'  
+  parent: system.admin_config_system  
+  weight: 99

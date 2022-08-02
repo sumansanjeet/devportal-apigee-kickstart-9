@@ -1,0 +1,24 @@
+name: Apigee Edge
+description: Apigee Edge Drupal integration.
+package: Apigee
+
+type: module
+core_version_requirement: ^8.7.7 || ^9
+
+dependencies:
+  - drupal:file
+  - drupal:user
+  - entity:entity
+  - drupal:filter
+  - drupal:options
+  - key:key
+  - drupal:system (>=8.7.0)
+
+configure: apigee_edge.settings
+
+php: "7.1"
+
+# Information added by Drupal.org packaging script on 2022-07-19
+version: '2.0.5'
+project: 'apigee_edge'
+datestamp: 1658213176

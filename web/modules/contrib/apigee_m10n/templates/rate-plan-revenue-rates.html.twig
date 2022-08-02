@@ -1,0 +1,25 @@
+{#
+/**
+ * @file
+ * Default theme implementation to display a apigee revenueShareRates details.
+ *
+ * Variables:
+ * - multipleShareText:             Share text.
+ * - nanos:                         Number of nano (10^-9) units of the amount.
+ * - revenueSharePercentage:        Share percentage
+ * - singleShareText:               Text.
+ */
+#}
+
+{% if multipleShareText %}
+  <tr>
+    <td>
+      {{ multipleShareText }}
+    </td>
+    <td>
+      {{ revenueSharePercentage }}
+    </td>
+  </tr>
+{% else %}
+  {{ singleShareText }}
+{% endif %}
