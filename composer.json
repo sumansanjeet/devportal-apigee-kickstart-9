@@ -52,6 +52,7 @@
     "drupal/jsonapi_extras": "^3.17",
     "drupal/menu_link_attributes": "^1.2",
     "drupal/menu_per_role": "^1.5",
+    "drupal/recaptcha": "^3.0",
     "drupal/redirect": "^1.7",
     "drupal/search_api": "^1.25",
     "drupal/search_autocomplete": "^2.0",

@@ -174,6 +174,7 @@ class ComposerStaticInite7cc40b55a336eb347f00ea88e2d27d8
             'Robo\\' => 5,
             'RobRichards\\XMLSecLibs\\' => 23,
             'React\\Promise\\' => 14,
+            'ReCaptcha\\' => 10,
         ),
         'P' => 
         array (
@@ -682,6 +683,10 @@ class ComposerStaticInite7cc40b55a336eb347f00ea88e2d27d8
         'React\\Promise\\' => 
         array (
             0 => __DIR__ . '/..' . '/react/promise/src',
+        ),
+        'ReCaptcha\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/google/recaptcha/src/ReCaptcha',
         ),
         'Psy\\' => 
         array (
